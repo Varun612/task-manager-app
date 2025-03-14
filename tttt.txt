@@ -1,0 +1,103 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Task } from '../types';
+
+const API_URL = "http://localhost:5000/tasks"; //backend api url
+
+const Home = () => {
+  const [tasks, setTasks] = useState<Task[]>([]); //state to store tasks
+  const [loading, setLoading] = useState(true); //state for loading status
+  const [error, setError] = useState(''); //state for error messages
+  const [newTask, setNewTask] = useState("");//state for input field
+  const [adding, setAdding] = useState(false);//state to show loading for add task
+
+  useEffect(() => {
+    axios
+      .get(API_URL) //Send GET request to backend
+      .then((response) => {
+        setTasks(response.data); //store tasks in state
+        setLoading(false); //stop loading
+      })
+      .catch((err) => {
+        setError('Failed to load tasks'); //store error message
+        setLoading(false);
+      });
+  }, []);
+
+  //function to add a new task
+  const addTask = () => {
+    if(!newTask.trim()) return;// prevent empty tasks
+    setAdding(true);// show loading while adding task
+
+    axios
+      .post(API_URL, { title: newTask })
+      .then((response) => {
+        setTasks([...tasks, response.data]);//add new task to UI
+        setNewTask("");// clear input field
+        setAdding(false);
+      });
+  };
+
+  // Function to toggle task completion
+  const toggleTaskCompletion = (taskId: string, completed: boolean) => {
+    axios
+      .put(`${API_URL}/${taskId}`, {completed: !completed}) //toggle status
+      .then((response) => {
+        setTasks(tasks.map((task) => 
+          task._id === taskId ? {...task, completed: response.data.completed }: task
+          ));
+      })
+      .catch(() => {
+        alert("Failed to update task");
+      });
+  };
+
+  //Function to delete a task
+  const deleteTask = (taskId: string) => {
+    axios
+      .delete(`${API_URL}/${taskId}`)
+      .then(() => {
+        setTasks(tasks.filter((task) => task._id !== taskId)); // remove from UI
+      })
+      .catch(() => {
+        alert("Failed to delete task");
+      });
+  };
+
+  if (loading) return <p>Loading tasks...</p>; //show loading message
+  if (error) return <p style={{ color: 'red' }}>{error}</p>; //show error if API fails
+
+  return (
+    <div>
+      <h1>Task Manager</h1>
+
+      {/* Add Task Input & Button */}
+      <div>
+        <input type="text" 
+        placeholder="Enter task title" 
+        value={newTask}
+        onChange={(e) => setNewTask(e.target.value)}
+        />
+        <button onClick={addTask} disabled={adding}>
+          {adding ? "Adding..." : "Add Task"}
+        </button>
+      </div>
+      {/* Task List */}
+      <ul>
+        {tasks.map((task) => (
+          <li key={task._id}>
+            {task.title} - {task.completed ? 'Completed' : 'Not Completed'}
+            <button onClick={() => toggleTaskCompletion(task._id, task.completed)}>
+              {task.completed ? "Undo": "Complete"}
+            </button>
+            <button onClick={() => deleteTask(task._id)} style={{ color: "red" }}>
+              Delete
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default Home;
