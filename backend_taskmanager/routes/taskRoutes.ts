@@ -10,22 +10,16 @@ router.post("/", async (req:Request, res: Response) => {
     	console.log("Request Headers:", req.headers); // Log headers
     	console.log("Request Body:", req.body); // Log body
 		const { title } = req.body;
-		if (!title) 
+		if (!title) {
 			// console.log("❌ Missing title in request body");
 			return res.status(400).json({ error: "Title is required"});
-
-		const newTask = new Task({ title });
-		// await newTask.save();
-		try {
-			const savedTask = await newTask.save();
-			console.log(" Task Created Scuccessfully: ", savedTask);
-			res.status(201).json(savedTask);
-		} catch (mongoError) {
-			console.log(" MongoDB Save Error", mongoError);
-			res.status(500).json({ error: "Failed to save task in database" });
 		}
-		// console.log("✅ Task Created:", newTask);
-		// res.status(201).json(newTask);
+
+		const newTask = new Task({ title, completed: false });
+		const savedTask = await newTask.save();
+
+		console.log(" Task Created Scuccessfully: ", savedTask);
+		res.status(201).json(savedTask);
 	} catch (error) {
 		console.error("Error Creating Task:", error);
 		res.status(500).json({ error: "Error creating task"});
@@ -60,8 +54,10 @@ router.put("/:id", async (req: Request, res: Response) => {
 // 4. Delete a Task (DELETE /tasks/:id) remove a task
 router.delete("/:id", async (req: Request, res: Response) => {
 	try {
-		await Task.findByIdAndDelete(req.params.id);
-		res.json({ message: "Task Deleted" });
+		const deletedTask = await Task.findByIdAndDelete(req.params.id);
+		if(!deletedTask) return res.status(404).json({ error: "Task not found" });
+
+		res.json({ message: "Task Deleted", deletedTask });
 	} catch (error) {
 		res.status(500).json({ error: "Error deleting task" });
 	}
