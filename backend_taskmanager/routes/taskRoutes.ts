@@ -4,7 +4,7 @@ import Task from "../models/taskModel";
 const router = express.Router()
 
 //Create a task (POST /tasks)  - add a new task
-router.post("/", async (req:Request, res: Response) => {
+router.post("/", async (req:Request, res: Response): Promise<void> => {
 	try {
 		console.log("Received POST request at /tasks"); // Log request
     	console.log("Request Headers:", req.headers); // Log headers
@@ -27,7 +27,7 @@ router.post("/", async (req:Request, res: Response) => {
 });
 
 // 2. Get All Tasks (GET /tasks) - get all tasks
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response): Promise<void> => {
 	try {
 		const tasks = await Task.find();
 		res.json(tasks);
@@ -37,7 +37,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // 3. Update a Task (PUT /tasks/:id) - update a task(mark complete/imcomplete)
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request, res: Response): Promise<void> => {
 	try {
 		const task = await Task.findById(req.params.id);
 		if (!task) return res.status(404).json({ error: "Task not found" });
@@ -52,7 +52,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 // 4. Delete a Task (DELETE /tasks/:id) remove a task
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", async (req: Request, res: Response): Promise<void> => {
 	try {
 		const deletedTask = await Task.findByIdAndDelete(req.params.id);
 		if(!deletedTask) return res.status(404).json({ error: "Task not found" });
