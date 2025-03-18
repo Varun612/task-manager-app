@@ -20,7 +20,7 @@ app.use(cors({
 	origin: "http://localhost:5173"
 }));
 app.use(express.json()); // Allow JSON data in requests
-app.use("/api/tasks", taskRoutes);
+app.use("/tasks", taskRoutes);
 
 // ✅ Test Route
 app.get("/", (req: Request, res: Response) => {
