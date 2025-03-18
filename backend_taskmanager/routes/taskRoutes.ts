@@ -1,7 +1,7 @@
 import  express , {Request,Response, Router} from "express";
 import Task from "../models/taskModel";
 
-const router = express.Router()
+const router: Router = express.Router()
 
 //Create a task (POST /tasks)  - add a new task
 router.post("/", async (req:Request, res: Response) => {
