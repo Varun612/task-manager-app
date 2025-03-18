@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "node node_modules/typescript/bin/tsc",
     "prestart": "npm run build",
     "start": "node dist/server.js",
     "dev": "nodemon server.ts"
